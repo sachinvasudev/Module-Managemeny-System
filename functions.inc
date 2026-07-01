@@ -1,6 +1,6 @@
 <?php
 
-
+require_once(__DIR__.'/mysql_compat.inc');
 
 function show_header($type)
 {
@@ -268,15 +268,15 @@ function show_admin_navigation()
 
 function db_connect()
 {
-	$host ='butterbur.nottingham.edu.my';
-	$user = 'keay7sva';
-	$pass = 'keay7sva_db';
+	$host ='localhost';
+	$user = 'mms_user';
+	$pass = 'mms_pass';
 	$dbname = 'keay7sva';
-	
+
 	@$db = mysql_connect($host,$user,$pass) or die('Could not connect to database');
 
 mysql_select_db($dbname);
-	
+
 }
 
 function show_sidebar()
@@ -289,21 +289,23 @@ function show_sidebar()
 
 function ad_connect()
 {
-	
-$ldaphost = "ad.nottingham.edu.my"; 
-$ldapport = 389;    
+	if (!function_exists('ldap_connect')) {
+		return false;
+	}
 
-            
+$ldaphost = "ad.nottingham.edu.my";
+$ldapport = 389;
 
 
-  $ldaprdn  = "kxldap";    
-  $ldappass = 'N0ttingh4m';  
+
+
+  $ldaprdn  = "kxldap";
+  $ldappass = 'N0ttingh4m';
 
 
 
 // Connecting to LDAP
-$ldapconn = ldap_connect($ldaphost, $ldapport)
-          or die("Could not connect to $ldaphost");
+$ldapconn = ldap_connect($ldaphost, $ldapport);
           
 
 if ($ldapconn) {
@@ -321,9 +323,13 @@ return $ldapconn;
 
 function ad_check($userid,$password)
 {
-	
+
 	$ldapconn = ad_connect();
-	
+
+	if (!$ldapconn) {
+		return false;
+	}
+
 	$dn = "ou=university, dc=nottingham, dc=edu, dc=my";
 $filter="(&(objectClass=user)(sAMAccountName=$userid))";
 
